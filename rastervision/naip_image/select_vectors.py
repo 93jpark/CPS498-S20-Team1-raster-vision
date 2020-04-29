@@ -164,10 +164,13 @@ def clean_out_training_data(parent_dir):
     labels = os.path.join(parent_dir, 'labels')
     image = os.path.join(parent_dir, 'image')
 
-    keep = [x[:6] for x in os.listdir(views)]
-    remove = [x for x in os.listdir(labels) if x[:6] not in keep]
+    keep = [x[:16] for x in os.listdir(views)]
+    print("keep:",keep)
+    remove = [x for x in os.listdir(labels) if x[:16] not in keep]
+    print("remove in labels":remove)
     [os.remove(os.path.join(labels, x)) for x in remove]
-    remove = [x for x in os.listdir(image) if x[:6] not in keep]
+    remove = [x for x in os.listdir(image) if x[:16] not in keep]
+    print("remove in image":remove)
     [os.remove(os.path.join(image, x)) for x in remove]
 
 
