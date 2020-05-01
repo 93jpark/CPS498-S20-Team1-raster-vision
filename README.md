@@ -1,3 +1,84 @@
+# Spring 2020 CPS498 Senior Design 
+### Team1 - _Delineation of Agricultural Field_
+___Introduction___<br>
+Our project is to digitize the boundaries of agricultural fields. This is accomplished by using satellite images to get vector data to help automatically draw the boundaries of the fields. This will help save time and money in the long run because there is a lot of time that is put into drawing these field boundaries by hand. This will just help speed up the process and make it more accurate in regards to the actual drawing of the field boundaries. It is also helpful in management efforts in regards to water consumption and optimization of other farming resources like fertilization.
+
+Team member
+------------|
+Joonwoo Park|
+Tyler Morgan|
+Thomas Hankins|
+
+- __Generate train data__<br>
+Technical advisor David Ketchum provided Raster Vision open source framework for object detection and semantic segmentation. Our team members set up the development environment such as installation of related libraries. Also, we generated 15000 train data for the Washington area.<br><br>
+_Below code generate train data_ : Retrieved from [select_vectors.py](https://github.com/93jpark/CPS498-S20-Team1-raster-vision/blob/instance_seg/rastervision/naip_image/select_vectors.py)
+```python
+if __name__ == '__main__':
+    home = os.path.expanduser('~')
+    
+    extraction = os.path.join(home, 'field_extraction')
+    states = [('WA_CMICH.shp', 2017)]
+    for file_, year in states:
+        name_prefix = file_.strip('.shp')
+        out_data = os.path.join(extraction, 'field_data',
+                              'raw_data', 'states', name_prefix)
+        if not os.path.exists(out_data):
+            os.mkdir(out_data)
+        shape_dir = os.path.join(extraction, 'field_data', 'raw_shapefiles')
+        shapes = os.path.join(shape_dir, file_)
+        target_number = 10
+        if not os.path.exists(shapes):
+            raise ValueError('{} does not exist'.format(shapes))
+
+        geos = get_geometries(shapes, n=target_number)
+        get_training_scenes(geos, instance_label=True, name_prefix=name_prefix, out_dir=out_data, year=year,
+                            n=target_number, save_shp=False, feature_range=(15001, 20000))
+```
+
+
+- __Validate images with label__<br><br>
+Generated train data require deleting images what have inaccurate boundaries. Our team members have been assigned 5000 images and labels to sort images with inaccurate boundaries out manually.<br><br>
+_Below code clean out training data_ : Retrieved from [select_vectors.py](https://github.com/93jpark/CPS498-S20-Team1-raster-vision/blob/instance_seg/rastervision/naip_image/select_vectors.py)
+```python
+if __name__ == '__main__':
+    home = os.path.expanduser('~')
+    
+    extraction = os.path.join(home, 'field_extraction')
+    states = [('WA_CMICH.shp', 2017)]
+    for file_, year in states:
+        name_prefix = file_.strip('.shp')
+        out_data = os.path.join(extraction, 'field_data',
+                              'raw_data', 'states', name_prefix)
+        if not os.path.exists(out_data):
+            os.mkdir(out_data)
+        shape_dir = os.path.join(extraction, 'field_data', 'raw_shapefiles')
+        shapes = os.path.join(shape_dir, file_)
+        target_number = 10
+        if not os.path.exists(shapes):
+            raise ValueError('{} does not exist'.format(shapes))
+      clean_out_training_data(tables)
+```
+
+```python
+def clean_out_training_data(parent_dir):
+    views = os.path.join(parent_dir, 'overview')
+    labels = os.path.join(parent_dir, 'labels')
+    image = os.path.join(parent_dir, 'image')
+
+    keep = [x[:16] for x in os.listdir(views)]
+    print("keep:",keep)
+    remove = [x for x in os.listdir(labels) if x[:16] not in keep]
+    print("remove in labels":remove)
+    [os.remove(os.path.join(labels, x)) for x in remove]
+    remove = [x for x in os.listdir(image) if x[:16] not in keep]
+    print("remove in image":remove)
+    [os.remove(os.path.join(image, x)) for x in remove]
+```
+
+<hr>
+## Below contents are for Raster Vision master branch
+<hr>
+
 ![Raster Vision Logo](docs/_static/raster-vision-logo.png)
 &nbsp;
 
